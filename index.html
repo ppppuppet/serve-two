@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>serve-two</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <!-- 导航栏区域 -->
+    <nav>
+        <!-- 品牌logo -->
+        <h1 class="brand"><a href="#">GDPU</a></h1>
+        <!-- 导航菜单 -->
+        <ul>
+            <li><a href="https://ppppuppet.github.io/home/">Home</a></li>
+            <li><a href="https://ppppuppet.github.io/serve-one/">serve one</a></li>
+            <li><a href="#">Serve two</a></li>
+            <li><a href="#">tutorial</a></li>
+        </ul>
+    </nav>
+
+    <!-- 移动端响应式导航栏 -->
+    <div class="responsive-bar">
+        <h3 class="brand"><a href="#">GDPU</a></h3>
+        <h4 class="menu">Menu</h4>
+    </div>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>Molecular Generation and Lead Optimization</h1>
+            <p>Generate drug-like analogs with high affinity and favorable druggability</p>
+        </header>
+
+        <!-- 模式选择模块 -->
+        <section class="module">
+            <h3>Mode Section</h3>
+            <div class="mode-switch">
+                <label for="demo-mode">
+                    <input type="radio" name="mode" id="demo-mode" value="demo" checked>
+                    Demo Mode - Preset drug/target combinations
+                </label>
+                <label for="advanced-mode">
+                    <input type="radio" name="mode" id="advanced-mode" value="advanced">
+                    Advanced Mode- Custom upload data
+                </label>
+            </div>
+        </section>
+
+        <!-- Demo模块 -->
+        <section class="demo-section demo-only">
+        <section class="module">
+            <h3>Baseline Input ( Target + Reference Drug ) </h3>
+            <div class="input-form">
+                <div class="form-item">
+                    <label for="target-select">Target</label>
+                    <select id="target-select" required>
+                        <option value="">Please select a preset target</option>
+                        <option value="Target_001" data-uniprot="P00533">Target_1 - EGFR (UniProt: P00533)</option>
+                        <option value="Target_002" data-uniprot="P11362">Target_2 - VEGFR2 (UniProt: P11362)</option>
+                        <option value="Target_003" data-uniprot="P04626">Target_3 - p53 (UniProt: P04626)</option>
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label for="drug-select">Reference Drug</label>
+                    <select id="drug-select" required>
+                        <option value="">Please select a preset drug</option>
+                        <option value="Drug_001" data-smiles="C1=CC=CC=C1C(=O)O" data-pic50="7.25">Drug_1 - 苯甲酸 (pIC50:7.25)</option>
+                        <option value="Drug_002" data-smiles="C2H5OH" data-pic50="6.89">Drug_2 - 乙醇 (pIC50:6.89)</option>
+                        <option value="Drug_003" data-smiles="C6H12O6" data-pic50="8.12">Drug_3 - 葡萄糖 (pIC50:8.12)</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- 自定义配置：生成数量+指标阈值 -->
+            <div class="config-section">
+                <h4>Generation and Screening Configuration</h4>
+                <div class="config-form">
+                    <div class="config-item">
+                        <label for="drug-count">Number of Generated Drugs</label>
+                        <input type="number" id="drug-count" min="1" max="50" value="10" step="1">
+                        <span class="config-tip">1-50</span>
+                    </div>
+                    <div class="config-item">
+                        <label for="dpic50-threshold">ΔpIC50 Threshold ≥</label>
+                        <input type="number" id="dpic50-threshold" min="-5" max="5" value="0.00" step="0.01">
+                    </div>
+                    <div class="config-item">
+                        <label for="logp-threshold">LogP Threshold ≤</label>
+                        <input type="number" id="logp-threshold" min="0" max="10" value="5.000" step="0.001">
+                    </div>
+                    <div class="config-item">
+                        <label for="sas-threshold">SAS Threshold ≤</label>
+                        <input type="number" id="sas-threshold" min="0" max="10" value="6.000" step="0.001">
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="generateMolecule()">Start Generation and Optimization</button>
+                <button class="btn btn-default" onclick="clearInput()">Clear Input</button>
+            </div>
+        </section>
+        </section>
+
+        <!-- Advanced 模式容器：新增 advanced-only 类（核心修改） -->
+        <section class="advanced-section advanced-only">
+        <section class="module">
+        <h3>Custom Upload Data</h3>
+        <div class="input-form">
+            <div class="form-item">
+                <label for="drug-upload">Upload Drug Files (Multiple allowed)</label>
+                <input type="file" id="drug-upload" accept=".txt,.csv,.smi" multiple>
+            </div>
+            <div class="form-item">
+                <label for="target-upload">Upload Target File</label>
+                <input type="file" id="target-upload" accept=".txt,.csv,.fasta" multiple>
+                <div id="drug-file-count" class="form-tip"></div>
+            </div>
+        </div>
+                        <!-- 自定义配置：生成数量+指标阈值 -->
+            <div class="config-section">
+                <h4>Generation and Screening Configuration</h4>
+                <div class="config-form">
+                    <div class="config-item">
+                        <label for="drug-count">Number of Generated Drugs</label>
+                        <input type="number" id="drug-count" min="1" max="50" value="10" step="1">
+                        <span class="config-tip">1-50</span>
+                    </div>
+                    <div class="config-item">
+                        <label for="dpic50-threshold">ΔpIC50 Threshold ≥</label>
+                        <input type="number" id="dpic50-threshold" min="-5" max="5" value="0.00" step="0.01">
+                    </div>
+                    <div class="config-item">
+                        <label for="logp-threshold">LogP Threshold ≤</label>
+                        <input type="number" id="logp-threshold" min="0" max="10" value="5.000" step="0.001">
+                    </div>
+                    <div class="config-item">
+                        <label for="sas-threshold">SAS Threshold ≤</label>
+                        <input type="number" id="sas-threshold" min="0" max="10" value="6.000" step="0.001">
+                    </div>
+                </div>
+            </div>
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="predictAffinityAdvanced()">Start Prediction</button>
+            <button class="btn btn-default" onclick="clearInputAdvanced()">Clear Input</button>
+        </div>
+        </section>
+        </section>
+
+        <!-- 生成结果模块 -->
+        <section class="module">
+            <h3>Results of Molecular Generation and Optimization</h3>
+            <div class="result-area">
+                <table class="result-table">
+                    <thead>
+                        <tr>
+                            <th>Generate SMILES</th>
+                            <th>2D Structural Diagram</th>
+                            <th>Predict pIC50</th>
+                            <th>ΔpIC50</th>
+                            <th>LogP</th>
+                            <th>SAS</th>
+                            <th>QED</th>
+                        </tr>
+                    </thead>
+                    <tbody id="result-tbody">
+                        <tr>
+                            <td colspan="7" class="empty-tip">No prediction results yet,Click [Start Generation and Optimization] to generate</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- 页脚区域 -->
+    <footer class="footer">
+        <!-- 页脚导航链接 -->
+        <div class="footer-links">
+            <a href="#">Github</a>
+            <a href="#">Paper</a>
+            <a href="#">Contact Us</a>
+        </div>
+        <!-- 引用说明 -->
+        <p class="footer-citation">
+            If you found useful, please consider citing our paper:<br>
+        </p>
+        <!-- 版权信息 -->
+        <p class="footer-copyright">
+            Copyright © 2023 CSU Bioinformatics Group. All rights reserved.
+        </p>
+    </footer>
+    
+    <!-- 引入jQuery库 -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript">
+        // 页面加载完成后执行
+        $(document).ready(function(){
+            // 移动端菜单点击事件：切换导航栏显示/隐藏
+            $(".menu").click(function(){
+                $("nav").slideToggle(500); // 500ms动画时长
+            });
+        // 页面加载时获取并解析URL参数（从亲和力预测页面传参）
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const drugName = params.get('drugName');
+            const drugSmiles = params.get('drugSmiles');
+            const targetName = params.get('targetName');
+            const targetUniprot = params.get('targetUniprot');
+            const refPic50 = params.get('refPic50');
+
+            // 若有传参，自动赋值并提示
+            if (drugName && targetName) {
+                const drugSelect = document.getElementById('drug-select');
+                const targetSelect = document.getElementById('target-select');
+                // 匹配靶点
+                for (let i = 0; i < targetSelect.options.length; i++) {
+                    if (targetSelect.options[i].text.includes(targetName.split(' - ')[1])) {
+                        targetSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+                // 匹配药物
+                for (let i = 0; i < drugSelect.options.length; i++) {
+                    if (drugSelect.options[i].text.includes(drugName.split(' - ')[1])) {
+                        drugSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+                // 弹出提示
+                alert(`已从亲和力预测页面导入参考组合：\n药物：${drugName}\n靶点：${targetName}\n参考pIC50：${refPic50}`);
+            }
+        }
+
+        // 监听模式切换单选框
+const modeRadios = document.querySelectorAll('input[name="mode"]');
+modeRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+        // 如果选中高级模式，给body加advanced类；否则移除
+        if (this.value === 'advanced') {
+            document.body.classList.add('advanced');
+        } else {
+            document.body.classList.remove('advanced');
+        }
+    });
+});
+
+// 初始化：默认选中Demo模式，确保body无advanced类
+document.addEventListener('DOMContentLoaded', function() {
+    const defaultRadio = document.querySelector('input[name="mode"][value="demo"]');
+    if (defaultRadio) {
+        defaultRadio.checked = true;
+        document.body.classList.remove('advanced');
+    }
+});
+
+// Demo 模式预测（原有逻辑保留）
+function predictAffinity() {
+    const drugSelect = document.getElementById('drug-select');
+    const targetSelect = document.getElementById('target-select');
+    const drugVal = drugSelect.value;
+    const targetVal = targetSelect.value;
+
+    if (!drugVal || !targetVal) {
+        alert('Please select preset drug and target!');
+        return;
+    }
+
+    const drugName = drugSelect.options[drugSelect.selectedIndex].text;
+    const drugSmiles = drugSelect.options[drugSelect.selectedIndex].dataset.smiles;
+    const targetName = targetSelect.options[targetSelect.selectedIndex].text;
+    const targetUniprot = targetSelect.options[targetSelect.selectedIndex].dataset.uniprot;
+    const pIC50 = (Math.random() * 6 + 4).toFixed(2);
+
+    renderResult(drugName, targetName, drugSmiles, targetUniprot, pIC50);
+}
+
+// Advanced 模式多文件预测（核心修改）
+async function predictAffinityAdvanced() {
+    // 1. 获取多文件列表
+    const drugFiles = document.getElementById('drug-upload').files;
+    const targetFiles = document.getElementById('target-upload').files;
+
+    // 2. 基础校验
+    if (drugFiles.length === 0 || targetFiles.length === 0) {
+        alert('Please upload at least one drug file and one target file!');
+        return;
+    }
+
+    // 3. 文件格式校验
+    const allowedDrugExt = ['txt', 'csv', 'smi'];
+    const allowedTargetExt = ['txt', 'csv', 'fasta'];
+    
+    // 校验所有drug文件
+    for (let i = 0; i < drugFiles.length; i++) {
+        const ext = drugFiles[i].name.split('.').pop().toLowerCase();
+        if (!allowedDrugExt.includes(ext)) {
+            alert(`Invalid drug file: ${drugFiles[i].name}! Allowed: ${allowedDrugExt.join(', ')}`);
+            return;
+        }
+    }
+    // 校验所有target文件
+    for (let i = 0; i < targetFiles.length; i++) {
+        const ext = targetFiles[i].name.split('.').pop().toLowerCase();
+        if (!allowedTargetExt.includes(ext)) {
+            alert(`Invalid target file: ${targetFiles[i].name}! Allowed: ${allowedTargetExt.join(', ')}`);
+            return;
+        }
+    }
+}
+
+        // 分子生成与优化模拟
+        function generateMolecule() {
+            const drugSelect = document.getElementById('drug-select');
+            const targetSelect = document.getElementById('target-select');
+            const drugVal = drugSelect.value;
+            const targetVal = targetSelect.value;
+            const drugCount = document.getElementById('drug-count').value;
+            const dPic50Thresh = parseFloat(document.getElementById('dpic50-threshold').value);
+            const logPThresh = parseFloat(document.getElementById('logp-threshold').value);
+            const sasThresh = parseFloat(document.getElementById('sas-threshold').value);
+
+            // 表单校验
+            if (!drugVal || !targetVal) {
+                alert('请选择预设的参考药物和靶点！');
+                return;
+            }
+            if (drugCount < 1 || drugCount > 50) {
+                alert('生成药物数量请设置在1-50之间！');
+                return;
+            }
+
+            // 获取参考药物pIC50
+            const refPic50 = parseFloat(drugSelect.options[drugSelect.selectedIndex].dataset.pic50);
+            // 渲染生成结果
+            const resultTbody = document.getElementById('result-tbody');
+            let resultHtml = '';
+
+            for (let i = 1; i <= drugCount; i++) {
+                // 模拟生成各项指标
+                const genPic50 = (Math.random() * 7 + 3).toFixed(2);
+                const dPic50 = (genPic50 - refPic50).toFixed(2);
+                const logP = (Math.random() * 8 + 0).toFixed(3);
+                const SAS = (Math.random() * 7 + 0).toFixed(3);
+                const QED = (Math.random() * 0.6 + 0.4).toFixed(3);
+                // 模拟SMILES
+                const genSmiles = `C${i}H${2*i+2}O${Math.floor(Math.random()*4+1)}N${Math.floor(Math.random()*2)}`;
+
+                // 按阈值筛选（仅展示符合条件的结果）
+                if (dPic50 >= dPic50Thresh && logP <= logPThresh && SAS <= sasThresh) {
+                    resultHtml += `
+                        <tr>
+                            <td>${genSmiles}</td>
+                            <td>
+                                <div class="mol-structure">结构${i}</div>
+                            </td>
+                            <td>${genPic50}</td>
+                            <td>${dPic50}</td>
+                            <td>${logP}</td>
+                            <td>${SAS}</td>
+                            <td>${QED}</td>
+                        </tr>
+                    `;
+                }
+            }
+
+            // 若无符合条件的结果
+            if (!resultHtml) {
+                resultHtml = '<tr><td colspan="7" class="empty-tip">暂无符合阈值条件的生成结果，请调整筛选配置后重试</td></tr>';
+            }
+
+            resultTbody.innerHTML = resultHtml;
+        }
+
+        // 清空输入
+        function clearInput() {
+            document.getElementById('drug-select').value = '';
+            document.getElementById('target-select').value = '';
+            document.getElementById('drug-upload').value = '';
+            document.getElementById('target-upload').value = '';
+            document.getElementById('drug-count').value = 10;
+            document.getElementById('dpic50-threshold').value = 0.00;
+            document.getElementById('logp-threshold').value = 5.000;
+            document.getElementById('sas-threshold').value = 6.000;
+            document.getElementById('result-tbody').innerHTML = '<tr><td colspan="7" class="empty-tip">暂无生成结果，点击「开始生成与优化」生成</td></tr>';
+        }
+        });
+    </script>    
+</body>
+</html>
